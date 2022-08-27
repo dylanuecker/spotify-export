@@ -7,7 +7,7 @@ with open("client_credentials.txt") as file:
     client_id = file.readline()
 
 state = "".join(secrets.choice(string.ascii_letters + string.digits) for i in range(20))
-scope = "" # need to add these
+scope = "playlist-read-private user-library-read playlist-read-collaborative"
 
 with open("state.txt", "w") as file:
     file.write(state + "\n")
