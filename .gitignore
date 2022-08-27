@@ -1,3 +1,4 @@
 client_credentials.txt
 state.txt
+access_token.txt
 *.swp
