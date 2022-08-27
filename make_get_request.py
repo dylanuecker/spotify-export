@@ -3,7 +3,6 @@
 import hashlib
 import secrets
 import string
-import sys
 
 with open("client_credentials.txt") as file:
     client_id = file.readline()
