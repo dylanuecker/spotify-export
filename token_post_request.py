@@ -4,6 +4,7 @@ import requests
 import base64
 
 uri = input("Enter redirected uri: ")
+print()
 params = uri[23:].split("&")
 
 first_param = params[0].split("=")
@@ -38,6 +39,13 @@ payload = {
 }
 
 response = requests.post("https://accounts.spotify.com/api/token", params = payload, headers = headers)
-print(response.status_code)
-print(response.json())
+
+access_token = response.json()["access_token"] # other returned params, but don't need
+
+with open("access_token.txt", "w") as file:
+    file.write(access_token)
+
+print("Successfully received and wrote access token")
+
+# Not implementing requesting a refreshed access token (just reauthenticate)
 

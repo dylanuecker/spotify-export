@@ -24,5 +24,7 @@ url = "https://accounts.spotify.com/authorize?"
 for key, value in payload.items():
     url += key + "=" + value + "&"
 
-print(url)
+print("Copy and paste the following url into a browser and hit enter.\n"
+        + "After authenticating with Spotify, run token_post_request.py "
+        + "and copy and paste the url given at localhost:\n\n" + url)
 
