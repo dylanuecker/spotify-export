@@ -13,9 +13,8 @@ if first_param[0] != "code":
 
 code = first_param[1]
 
-with open("get_request_params.txt") as file:
+with open("state.txt") as file:
     state = file.readline().strip()
-    code_verifier = file.readline().strip()
 
 if params[1].split("=")[1] != state:
     print("State does not match")
@@ -36,8 +35,6 @@ payload = {
     "grant_type" : "authorization_code",
     "code" : code,
     "redirect_uri" : "http://localhost:8080",
-    "client_id" : client_id,
-    "code_verifier" : code_verifier
 }
 
 response = requests.post("https://accounts.spotify.com/api/token", params = payload, headers = headers)

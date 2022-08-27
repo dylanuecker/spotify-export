@@ -1,4 +1,2 @@
 client_credentials.txt
-user_credentials.txt
-geckodriver.log
-get_request_params.txt
+state.txt
