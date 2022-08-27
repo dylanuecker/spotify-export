@@ -6,12 +6,11 @@ import string
 
 with open("client_credentials.txt") as file:
     client_id = file.readline()
-    client_secret = file.readline()
 
 state = "".join(secrets.choice(string.ascii_letters + string.digits) for i in range(20))
 scope = "" # need to add these
 code_verifier = "".join(secrets.choice(string.ascii_letters + string.digits) for i in range(secrets.randbelow(128 - 43 + 1) + 43))
-hashed_code_verifier = hashlib.sha256(code_verifier.encode("utf-8")).hexdigest()
+hashed_code_verifier = hashlib.sha256(code_verifier.encode("ascii")).hexdigest()
 
 with open("get_request_params.txt", "w") as file:
     file.write(state + "\n")
