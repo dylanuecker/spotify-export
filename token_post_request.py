@@ -40,12 +40,11 @@ payload = {
 
 response = requests.post("https://accounts.spotify.com/api/token", params = payload, headers = headers)
 
-access_token = response.json()["access_token"] # other returned params, but don't need
-
 with open("authentication/access_token.txt", "w") as file:
-    file.write(access_token)
+    file.write(response.json()["access_token"])
 
-print("Successfully received and wrote access token")
+with open("authentication/refresh_token.txt", "w") as file:
+    file.write(response.json()["refresh_token"])
 
-# Not implementing requesting a refreshed access token (just reauthenticate)
+print("Successfully received and wrote access token + refresh token")
 
