@@ -48,19 +48,19 @@ def ms_to_min_and_sec(ms):
     ro_se = int(round(se))
     return str(int(mi)) + ":" + ("0" if ro_se < 10 else "") + str(ro_se)
 
-def strip_and_write_song(song, output):
-    row = "\n" + song["track"]["name"] + ","
+def strip_and_write_track(track, output):
+    row = "\n" + track["track"]["name"] + ","
     first = True
-    for artist in song["track"]["artists"]:
+    for artist in track["track"]["artists"]:
         if first:
             first = False
         else:
             row += " "
         row += artist["name"]
-    row += "," + song["track"]["album"]["name"]
-    row += "," + song["added_at"]
-    row += "," + ms_to_min_and_sec(song["track"]["duration_ms"])
-    row += "," + ("yes" if song["track"]["explicit"] else "no")
+    row += "," + track["track"]["album"]["name"]
+    row += "," + track["added_at"]
+    row += "," + ms_to_min_and_sec(track["track"]["duration_ms"])
+    row += "," + ("yes" if track["track"]["explicit"] else "no")
     output.write(row)
 
 def strip_and_write_album(album, output):
@@ -90,7 +90,7 @@ def export_saved_tracks():
 
         for saved_track in requests.get(base_url + "/me/tracks", headers = headers, params = payload).json()["items"]:
             write_raw(saved_track, st_raw_file)
-            strip_and_write_song(saved_track, st_file)
+            strip_and_write_track(saved_track, st_file)
 
     st_raw_file.close()
     st_file.close()
@@ -116,7 +116,32 @@ def export_saved_albums():
     sa_file.close()
 
 def export_playlists():
-    return
+    total = requests.get(base_url + "/me/playlists", headers = headers).json()["total"]
+    print("Number of playlists: " + str(total))
+    total = 1
+    per_get = 1 
+
+    # handling local files here correctly?
+
+    for offset in range(0, total, per_get):
+        payload = {
+            "limit" : per_get,
+            "offset" : offset
+        }
+
+        for playlist_link in requests.get(base_url + "/me/playlists", headers = headers, params = payload).json()["items"]:
+            playlist = requests.get(base_url + "/playlists/" + playlist_link["id"], headers = headers, params = payload).json()
+            name = playlist["name"]
+
+            p_raw_file = open("exports/playlists/" + name + "_raw.txt", "w")
+            write_raw(playlist, p_raw_file)
+            p_raw_file.close()
+
+            p_file = open("exports/playlists/" + name + ".csv", "w")
+            p_file.write("name,artist(s),album,added_at,duration,explicit")
+            for track in playlist["tracks"]["items"]:
+                strip_and_write_track(track, p_file)
+            p_file.close()
 
 if do_export_saved_tracks:
     export_saved_tracks()
