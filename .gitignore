@@ -2,9 +2,6 @@ client_credentials.txt
 state.txt
 *.swp
 access_token.txt
-saved_tracks.csv
-raw_saved_tracks.txt
-saved_albums.csv
-raw_saved_albums.txt
+saved_tracks*
+saved_albums*
 playlist*
-raw_playlist*
