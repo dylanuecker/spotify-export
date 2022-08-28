@@ -6,7 +6,7 @@ albums will not have an added_at entry.
 - artist(s)
 - album
 - added_at
-- duration_ms
+- duration
 - explicit
 
 Liked songs, saved albums, and playlists (both private and collaborative).
