@@ -64,7 +64,16 @@ def strip_and_write_song(song, output):
     output.write(row)
 
 def strip_and_write_album(album, output):
-    print(album)
+    row = "\n" + album["album"]["name"] + ","
+    first = True
+    for artist in album["album"]["artists"]:
+        if first:
+            first = False
+        else:
+            row += " "
+        row += artist["name"]
+    row += "," + album["added_at"]
+    output.write(row)
 
 def export_saved_tracks():
     total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
@@ -86,13 +95,12 @@ def export_saved_tracks():
     st_raw_file.close()
     st_file.close()
 
-def export_albums():
-    print(requests.get(base_url + "/me/albums", headers = headers))
+def export_saved_albums():
     total = requests.get(base_url + "/me/albums", headers = headers).json()["total"]
     per_get = 50 
-    a_raw_file = open("exports/albums_raw.txt", "w")
-    a_file = open("exports/albums.csv", "w")
-    a_file.write("name,artist(s),added_at,duration,explicit")
+    sa_raw_file = open("exports/saved_albums_raw.txt", "w")
+    sa_file = open("exports/saved_albums.csv", "w")
+    sa_file.write("name,artist(s),added_at")
 
     for offset in range(0, total, per_get):
         payload = {
@@ -101,11 +109,11 @@ def export_albums():
         }
 
         for album in requests.get(base_url + "/me/albums", headers = headers, params = payload).json()["items"]:
-            write_raw(album, a_raw_file)
-            strip_and_write_album(album, a_file)
+            write_raw(album, sa_raw_file)
+            strip_and_write_album(album, sa_file)
 
-    a_raw_file.close()
-    a_file.close()
+    sa_raw_file.close()
+    sa_file.close()
 
 def export_playlists():
     return
@@ -115,7 +123,7 @@ if do_export_saved_tracks:
     print("Exported saved tracks")
 
 if do_export_saved_albums:
-    export_albums()
+    export_saved_albums()
     print("Exported saved albums")
 
 if do_export_playlists:
