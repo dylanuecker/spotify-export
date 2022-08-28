@@ -14,14 +14,14 @@ if first_param[0] != "code":
 
 code = first_param[1]
 
-with open("state.txt") as file:
+with open("authentication/state.txt") as file:
     state = file.readline().strip()
 
 if params[1].split("=")[1] != state:
     print("State does not match")
     exit()
 
-with open("client_credentials.txt") as file:
+with open("authentication/client_credentials.txt") as file:
     client_id = file.readline().strip()
     client_secret = file.readline().strip()
 
@@ -42,7 +42,7 @@ response = requests.post("https://accounts.spotify.com/api/token", params = payl
 
 access_token = response.json()["access_token"] # other returned params, but don't need
 
-with open("access_token.txt", "w") as file:
+with open("authentication/access_token.txt", "w") as file:
     file.write(access_token)
 
 print("Successfully received and wrote access token")

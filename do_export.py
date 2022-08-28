@@ -3,7 +3,7 @@
 import requests
 import json
 
-with open("access_token.txt") as file:
+with open("authentication/access_token.txt") as file:
     access_token = file.readline()
 
 base_url = "https://api.spotify.com/v1"
@@ -26,8 +26,8 @@ def strip_and_write_song(song, output):
 # saved tracks first (saved local files are not counted, see Spotify Local Music for these if so desired)
 total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
 per_get = 1 
-raw_file = open("saved_tracks_raw.txt", "w")
-formatted_file = open("saved_tracks.csv", "w")
+raw_file = open("exports/saved_tracks_raw.txt", "w")
+formatted_file = open("exports/saved_tracks.csv", "w")
 formatted_file.write("name,artist(s),album,added_at,duration_ms,explicit")
 # using commas as delimiter, not worrying about commas in data
 
