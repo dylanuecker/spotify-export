@@ -2,6 +2,33 @@
 
 import requests
 import json
+import sys
+
+usage = "Usage ./do_export.py <y/n for saved tracks> <y/n for saved albums> <y/n for playlists>"
+
+if len(sys.argv) != 4:
+    sys.exit(usage)
+
+if sys.argv[1] == "y" or sys.argv[1] == "Y":
+    do_export_saved_tracks = True
+elif sys.argv[1] == "n" or sys.argv[1] == "N":
+    do_export_saved_tracks = False
+else:
+    sys.exit(usage)
+
+if sys.argv[2] == "y" or sys.argv[2] == "Y":
+    do_export_saved_albums = True
+elif sys.argv[2] == "n" or sys.argv[2] == "N":
+    do_export_saved_albums = False
+else:
+    sys.exit(usage)
+
+if sys.argv[3] == "y" or sys.argv[3] == "Y":
+    do_export_playlists = True
+elif sys.argv[3] == "n" or sys.argv[3] == "N":
+    do_export_playlists = False
+else:
+    sys.exit(usage)
 
 with open("authentication/access_token.txt") as file:
     access_token = file.readline()
@@ -13,8 +40,8 @@ headers = {
     "Content-Type" : "application/json"
 }
 
-def write_raw(song, output):
-    output.write(json.dumps(song) + "\n\n")
+def write_raw(raw, output):
+    output.write(json.dumps(raw) + "\n\n")
 
 def ms_to_min_and_sec(ms):
     mi, se = divmod(ms / 1000, 60)
@@ -36,13 +63,15 @@ def strip_and_write_song(song, output):
     row += "," + ("yes" if song["track"]["explicit"] else "no")
     output.write(row)
 
+def strip_and_write_album(album, output):
+    print(album)
+
 def export_saved_tracks():
     total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
     per_get = 50 
     st_raw_file = open("exports/saved_tracks_raw.txt", "w")
     st_file = open("exports/saved_tracks.csv", "w")
     st_file.write("name,artist(s),album,added_at,duration,explicit")
-    # using commas as delimiter, not worrying about commas in data
 
     for offset in range(0, total, per_get):
         payload = {
@@ -58,12 +87,38 @@ def export_saved_tracks():
     st_file.close()
 
 def export_albums():
-    return
+    print(requests.get(base_url + "/me/albums", headers = headers))
+    total = requests.get(base_url + "/me/albums", headers = headers).json()["total"]
+    per_get = 50 
+    a_raw_file = open("exports/albums_raw.txt", "w")
+    a_file = open("exports/albums.csv", "w")
+    a_file.write("name,artist(s),added_at,duration,explicit")
+
+    for offset in range(0, total, per_get):
+        payload = {
+            "limit" : per_get,
+            "offset" : offset
+        }
+
+        for album in requests.get(base_url + "/me/albums", headers = headers, params = payload).json()["items"]:
+            write_raw(album, a_raw_file)
+            strip_and_write_album(album, a_file)
+
+    a_raw_file.close()
+    a_file.close()
 
 def export_playlists():
     return
 
-export_saved_tracks()
-#export_albums()
-#export_playlists()
+if do_export_saved_tracks:
+    export_saved_tracks()
+    print("Exported saved tracks")
+
+if do_export_saved_albums:
+    export_albums()
+    print("Exported saved albums")
+
+if do_export_playlists:
+    export_playlists()
+    print("Exported playlists")
 
