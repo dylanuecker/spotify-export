@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import requests
+import json
 
 with open("access_token.txt") as file:
     access_token = file.readline()
@@ -12,17 +13,34 @@ headers = {
     "Content-Type" : "application/json"
 }
 
+def write_raw(song, output):
+    output.write(json.dumps(song) + "\n\n")
+
+def strip_and_write_song(song, output):
+    print(song["added_at"])
+    for elem in song["track"]:
+        print(elem)
+    print(song["track"]["artists"][0]["name"])
+    print(song["track"]["id"])
+
 # saved tracks first (saved local files are not counted, see Spotify Local Music for these if so desired)
 total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
+per_get = 1 
+raw_file = open("saved_tracks_raw.txt", "w")
+formatted_file = open("saved_tracks.csv", "w")
+formatted_file.write("name,artist(s),album,added_at,duration_ms,explicit")
+# using commas as delimiter, not worrying about commas in data
 
-with open("saved_tracks.txt", "w") as file:
-    for i in range(0, total, 50):
-        payload = {
-            "limit" : 50,
-            "offset" : i
-        }
+for offset in range(0, 1, per_get):
+    payload = {
+        "limit" : per_get,
+        "offset" : offset
+    }
 
-        for saved_track in requests.get(base_url + "/me/tracks", headers = headers, params = payload).json()["items"]:
-            print(saved_track)
-            #file.write(saved_track + "\n")
+    for saved_track in requests.get(base_url + "/me/tracks", headers = headers, params = payload).json()["items"]:
+        write_raw(saved_track, raw_file)
+        strip_and_write_song(saved_track, formatted_file)
+
+raw_file.close()
+formatted_file.close()
 
