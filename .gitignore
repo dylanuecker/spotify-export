@@ -1,4 +1,7 @@
 client_credentials.txt
 state.txt
-access_token.txt
 *.swp
+access_token.txt
+saved_tracks.txt
+saved_albums.txt
+playlist*
