@@ -75,6 +75,21 @@ def strip_and_write_album(album, output):
     row += "," + album["added_at"]
     output.write(row)
 
+def strip_and_write_from_playlist(track, output):
+    row = "\n" + track["track"]["name"] + ","
+    first = True
+    for artist in track["track"]["artists"]:
+        if first:
+            first = False
+        else:
+            row += " "
+        row += artist["name"]
+    row += "," + track["track"]["album"]["name"]
+    row += "," + track["added_at"]
+    row += "," + ms_to_min_and_sec(track["track"]["duration_ms"])
+    row += "," + ("yes" if track["track"]["explicit"] else "no")
+    output.write(row)
+
 def export_saved_tracks():
     total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
     per_get = 50 
@@ -138,9 +153,12 @@ def export_playlists():
             p_raw_file.close()
 
             p_file = open("exports/playlists/" + name + ".csv", "w")
-            p_file.write("name,artist(s),album,added_at,duration,explicit")
+            p_file.write("name,artist(s),album,added_by,added_at,is_local,duration,explicit")
             for track in playlist["tracks"]["items"]:
-                strip_and_write_track(track, p_file)
+                print()
+                for key in track:
+                    print(key)
+                strip_and_write_from_playlist(track, p_file)
             p_file.close()
 
 if do_export_saved_tracks:
