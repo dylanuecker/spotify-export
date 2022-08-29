@@ -2,15 +2,15 @@
 
 import requests
 import base64
+import sys
 
-uri = input("Enter redirected uri: ")
+uri = input("Copy and paste the localhost uri you were directed to after authentication: ")
 print()
 params = uri[23:].split("&")
 
 first_param = params[0].split("=")
 if first_param[0] != "code":
-    print("Error with logging in user")
-    exit()
+    sys.exit("Error with logging in user")
 
 code = first_param[1]
 
@@ -18,8 +18,7 @@ with open("authentication/state.txt") as file:
     state = file.readline().strip()
 
 if params[1].split("=")[1] != state:
-    print("State does not match")
-    exit()
+    sys.exit("State does not match")
 
 with open("authentication/client_credentials.txt") as file:
     client_id = file.readline().strip()
@@ -46,5 +45,5 @@ with open("authentication/access_token.txt", "w") as file:
 with open("authentication/refresh_token.txt", "w") as file:
     file.write(response.json()["refresh_token"])
 
-print("Successfully received and wrote access token + refresh token")
+print("Successfully received and wrote access token + refresh token\n")
 

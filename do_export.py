@@ -41,6 +41,9 @@ headers = {
     "Content-Type" : "application/json"
 }
 
+width = 30
+lotta_spaces = " " * width + "\r"
+
 def write_raw(raw, output):
     output.write(json.dumps(raw) + "\n\n")
 
@@ -104,6 +107,8 @@ def export_saved_tracks():
         }
 
         for saved_track in requests.get(base_url + "/me/tracks", headers = headers, params = payload).json()["items"]:
+            print(lotta_spaces, end = "")
+            print("Exporting " + saved_track["track"]["name"][:width - 10] + "\r", end = "")
             write_raw(saved_track, st_raw_file)
             strip_and_write_track(saved_track, st_file, False)
 
@@ -124,6 +129,8 @@ def export_saved_albums():
         }
 
         for album in requests.get(base_url + "/me/albums", headers = headers, params = payload).json()["items"]:
+            print(lotta_spaces, end = "")
+            print("Exporting " + album["album"]["name"][:width - 10] + "\r", end = "")
             write_raw(album, sa_raw_file)
             strip_and_write_album(album, sa_file)
 
@@ -150,6 +157,8 @@ def export_playlists():
             strip_and_write_playlist_metadata(playlist, ap_file)
 
             name = playlist["name"]
+            print(lotta_spaces, end = "")
+            print("Exporting " + name[:width - 10] + "\r", end = "")
             name = name.replace("/", "") # don't screw up directories
 
             p_raw_file = open("exports/playlists/" + name + "_raw.txt", "w")
@@ -166,14 +175,20 @@ def export_playlists():
     ap_file.close()
 
 if do_export_saved_tracks:
+    print("Starting saved tracks export")
     export_saved_tracks()
-    print("Exported saved tracks")
+    print(lotta_spaces, end = "")
+    print("Exported saved tracks\n")
 
 if do_export_saved_albums:
+    print("Starting saved albums export")
     export_saved_albums()
-    print("Exported saved albums")
+    print(lotta_spaces, end = "")
+    print("Exported saved albums\n")
 
 if do_export_playlists:
+    print("Starting playlists export")
     export_playlists()
+    print(lotta_spaces, end = "")
     print("Exported playlists")
 
