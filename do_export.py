@@ -81,7 +81,7 @@ def strip_and_write_album(album, output):
         row += artist["name"]
     row += "," + album["added_at"]
     output.write(row)
-
+# Could really do a much job writing these methods and reduce redundant code, but who cares
 def strip_and_write_playlist_metadata(playlist, output):
     row = "\n" + playlist["name"]
     row += "," + playlist["owner"]["id"]
