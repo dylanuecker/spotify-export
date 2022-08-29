@@ -34,6 +34,7 @@ with open("authentication/access_token.txt") as file:
     access_token = file.readline()
 
 base_url = "https://api.spotify.com/v1"
+per_get = 50
 
 headers = {
     "Authorization" : "Bearer " + access_token,
@@ -48,26 +49,32 @@ def ms_to_min_and_sec(ms):
     ro_se = int(round(se))
     return str(int(mi)) + ":" + ("0" if ro_se < 10 else "") + str(ro_se)
 
-def strip_and_write_track(track, output):
-    row = "\n" + track["track"]["name"] + ","
+def strip_and_write_track(track, output, from_playlist):
+    row = "\n" + track["track"]["name"]
     first = True
     for artist in track["track"]["artists"]:
         if first:
+            row += ","
             first = False
         else:
             row += " "
         row += artist["name"]
     row += "," + track["track"]["album"]["name"]
     row += "," + track["added_at"]
+    if from_playlist:
+        first = True
+        row += "," + track["added_by"]["id"]
+        row += "," + ("yes" if track["is_local"] else "no")
     row += "," + ms_to_min_and_sec(track["track"]["duration_ms"])
     row += "," + ("yes" if track["track"]["explicit"] else "no")
     output.write(row)
 
 def strip_and_write_album(album, output):
-    row = "\n" + album["album"]["name"] + ","
+    row = "\n" + album["album"]["name"]
     first = True
     for artist in album["album"]["artists"]:
         if first:
+            row += ","
             first = False
         else:
             row += " "
@@ -75,24 +82,17 @@ def strip_and_write_album(album, output):
     row += "," + album["added_at"]
     output.write(row)
 
-def strip_and_write_from_playlist(track, output):
-    row = "\n" + track["track"]["name"] + ","
-    first = True
-    for artist in track["track"]["artists"]:
-        if first:
-            first = False
-        else:
-            row += " "
-        row += artist["name"]
-    row += "," + track["track"]["album"]["name"]
-    row += "," + track["added_at"]
-    row += "," + ms_to_min_and_sec(track["track"]["duration_ms"])
-    row += "," + ("yes" if track["track"]["explicit"] else "no")
+def strip_and_write_playlist_metadata(playlist, output):
+    row = "\n" + playlist["name"]
+    row += "," + playlist["owner"]["id"]
+    row += "," + ("yes" if playlist["collaborative"] else "no")
+    row += "," + ("null" if playlist["public"] == "Null" else ("public" if playlist["public"] == "True" else "private"))
+    row += ',"' + playlist["description"] + '"' # high probability of " in description
     output.write(row)
 
 def export_saved_tracks():
     total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
-    per_get = 50 
+    print("Number of saved tracks: " + str(total))
     st_raw_file = open("exports/saved_tracks_raw.txt", "w")
     st_file = open("exports/saved_tracks.csv", "w")
     st_file.write("name,artist(s),album,added_at,duration,explicit")
@@ -105,14 +105,14 @@ def export_saved_tracks():
 
         for saved_track in requests.get(base_url + "/me/tracks", headers = headers, params = payload).json()["items"]:
             write_raw(saved_track, st_raw_file)
-            strip_and_write_track(saved_track, st_file)
+            strip_and_write_track(saved_track, st_file, False)
 
     st_raw_file.close()
     st_file.close()
 
 def export_saved_albums():
     total = requests.get(base_url + "/me/albums", headers = headers).json()["total"]
-    per_get = 50 
+    print("Number of saved albums: " + str(total))
     sa_raw_file = open("exports/saved_albums_raw.txt", "w")
     sa_file = open("exports/saved_albums.csv", "w")
     sa_file.write("name,artist(s),added_at")
@@ -133,9 +133,9 @@ def export_saved_albums():
 def export_playlists():
     total = requests.get(base_url + "/me/playlists", headers = headers).json()["total"]
     print("Number of playlists: " + str(total))
-    total = 1
-    per_get = 1 
-
+    ap_raw_file = open("exports/all_playlists_raw.txt", "w")
+    ap_file = open("exports/all_playlists.csv", "w")
+    ap_file.write("name,owner,collaborative,public,description")
     # handling local files here correctly?
 
     for offset in range(0, total, per_get):
@@ -146,6 +146,9 @@ def export_playlists():
 
         for playlist_link in requests.get(base_url + "/me/playlists", headers = headers, params = payload).json()["items"]:
             playlist = requests.get(base_url + "/playlists/" + playlist_link["id"], headers = headers, params = payload).json()
+            write_raw(playlist, ap_raw_file)
+            strip_and_write_playlist_metadata(playlist, ap_file)
+
             name = playlist["name"]
 
             p_raw_file = open("exports/playlists/" + name + "_raw.txt", "w")
@@ -153,13 +156,13 @@ def export_playlists():
             p_raw_file.close()
 
             p_file = open("exports/playlists/" + name + ".csv", "w")
-            p_file.write("name,artist(s),album,added_by,added_at,is_local,duration,explicit")
+            p_file.write("name,artist(s),album,added_at,added_by,is_local,duration,explicit")
             for track in playlist["tracks"]["items"]:
-                print()
-                for key in track:
-                    print(key)
-                strip_and_write_from_playlist(track, p_file)
+                strip_and_write_track(track, p_file, True)
             p_file.close()
+
+    ap_raw_file.close()
+    ap_file.close()
 
 if do_export_saved_tracks:
     export_saved_tracks()
