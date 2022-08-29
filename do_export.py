@@ -86,7 +86,7 @@ def strip_and_write_playlist_metadata(playlist, output):
     row = "\n" + playlist["name"]
     row += "," + playlist["owner"]["id"]
     row += "," + ("yes" if playlist["collaborative"] else "no")
-    row += "," + ("null" if playlist["public"] == "Null" else ("public" if playlist["public"] == "True" else "private"))
+    row += "," + ("public" if playlist["public"] else "private")
     row += ',"' + playlist["description"] + '"' # high probability of " in description
     output.write(row)
 
@@ -150,6 +150,7 @@ def export_playlists():
             strip_and_write_playlist_metadata(playlist, ap_file)
 
             name = playlist["name"]
+            name = name.replace("/", "") # don't screw up directories
 
             p_raw_file = open("exports/playlists/" + name + "_raw.txt", "w")
             write_raw(playlist, p_raw_file)
