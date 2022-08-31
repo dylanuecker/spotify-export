@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import authentication_path.py
-import exports_path.py
+from relative_paths import AUTHENTICATION_PATH, EXPORTS_PATH, PLAYLISTS_PATH
 import requests
 import json
 import sys

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import authentication_path.py
+from relative_paths import AUTHENTICATION_PATH
 import secrets
 import string
 import webbrowser

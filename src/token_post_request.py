@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import authentication_path.py
+from relative_paths import AUTHENTICATION_PATH
 import requests
 import base64
 import sys
 
-uri = input("Copy and paste the localhost uri you were directed to after authentication: ")
+uri = input("Copy and paste the localhost uri you were directed to after authentication:\n\n")
 print()
 params = uri[23:].split("&")
 
