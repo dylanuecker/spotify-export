@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import authentication_path.py
+import exports_path.py
 import requests
 import json
 import sys
@@ -30,7 +32,7 @@ elif sys.argv[3] == "n" or sys.argv[3] == "N":
 else:
     sys.exit(usage)
 
-with open("authentication/access_token.txt") as file:
+with open(AUTHENTICATION_PATH + "access_token.txt") as file:
     access_token = file.readline()
 
 base_url = "https://api.spotify.com/v1"
@@ -84,6 +86,7 @@ def strip_and_write_album(album, output):
         row += artist["name"]
     row += "," + album["added_at"]
     output.write(row)
+
 # Could really do a much job writing these methods and reduce redundant code, but who cares
 def strip_and_write_playlist_metadata(playlist, output):
     row = "\n" + playlist["name"]
@@ -96,8 +99,8 @@ def strip_and_write_playlist_metadata(playlist, output):
 def export_saved_tracks():
     total = requests.get(base_url + "/me/tracks", headers = headers).json()["total"]
     print("Number of saved tracks: " + str(total))
-    st_raw_file = open("exports/saved_tracks_raw.txt", "w")
-    st_file = open("exports/saved_tracks.csv", "w")
+    st_raw_file = open(EXPORTS_PATH + "saved_tracks_raw.txt", "w")
+    st_file = open(EXPORTS_PATH + "saved_tracks.csv", "w")
     st_file.write("name,artist(s),album,added_at,duration,explicit")
 
     for offset in range(0, total, per_get):
@@ -118,8 +121,8 @@ def export_saved_tracks():
 def export_saved_albums():
     total = requests.get(base_url + "/me/albums", headers = headers).json()["total"]
     print("Number of saved albums: " + str(total))
-    sa_raw_file = open("exports/saved_albums_raw.txt", "w")
-    sa_file = open("exports/saved_albums.csv", "w")
+    sa_raw_file = open(EXPORTS_PATH + "saved_albums_raw.txt", "w")
+    sa_file = open(EXPORTS_PATH + "saved_albums.csv", "w")
     sa_file.write("name,artist(s),added_at")
 
     for offset in range(0, total, per_get):
@@ -140,8 +143,8 @@ def export_saved_albums():
 def export_playlists():
     total = requests.get(base_url + "/me/playlists", headers = headers).json()["total"]
     print("Number of playlists: " + str(total))
-    ap_raw_file = open("exports/all_playlists_raw.txt", "w")
-    ap_file = open("exports/all_playlists.csv", "w")
+    ap_raw_file = open(EXPORTS_PATH + "all_playlists_raw.txt", "w")
+    ap_file = open(EXPORTS_PATH + "all_playlists.csv", "w")
     ap_file.write("name,owner,collaborative,public,description")
     # handling local files here correctly?
 
@@ -161,11 +164,11 @@ def export_playlists():
             print("Exporting " + name[:width - 10] + "\r", end = "")
             name = name.replace("/", "") # don't screw up directories
 
-            p_raw_file = open("exports/playlists/" + name + "_raw.txt", "w")
+            p_raw_file = open(PLAYLISTS_PATH + name + "_raw.txt", "w")
             write_raw(playlist, p_raw_file)
             p_raw_file.close()
 
-            p_file = open("exports/playlists/" + name + ".csv", "w")
+            p_file = open(PLAYLISTS_PATH + name + ".csv", "w")
             p_file.write("name,artist(s),album,added_at,added_by,is_local,duration,explicit")
             for track in playlist["tracks"]["items"]:
                 strip_and_write_track(track, p_file, True)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import authentication_path.py
 import requests
 import base64
 import sys
@@ -14,13 +15,13 @@ if first_param[0] != "code":
 
 code = first_param[1]
 
-with open("authentication/state.txt") as file:
+with open(AUTHENTICATION_PATH + "/state.txt") as file:
     state = file.readline().strip()
 
 if params[1].split("=")[1] != state:
     sys.exit("State does not match")
 
-with open("authentication/client_credentials.txt") as file:
+with open(AUTHENTICATION_PATH + "client_credentials.txt") as file:
     client_id = file.readline().strip()
     client_secret = file.readline().strip()
 
@@ -39,10 +40,10 @@ payload = {
 
 response = requests.post("https://accounts.spotify.com/api/token", params = payload, headers = headers)
 
-with open("authentication/access_token.txt", "w") as file:
+with open(AUTHENTICATION_PATH + "access_token.txt", "w") as file:
     file.write(response.json()["access_token"])
 
-with open("authentication/refresh_token.txt", "w") as file:
+with open(AUTHENTICATION_PATH + "refresh_token.txt", "w") as file:
     file.write(response.json()["refresh_token"])
 
 print("Successfully received and wrote access token + refresh token\n")

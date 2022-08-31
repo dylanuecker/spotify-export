@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
+import authentication_path.py
 import secrets
 import string
 import webbrowser
 
-with open("authentication/client_credentials.txt") as file:
+with open(AUTHENTICATION_PATH + "client_credentials.txt") as file:
     client_id = file.readline()
 
 state = "".join(secrets.choice(string.ascii_letters + string.digits) for i in range(20))
 scope = "playlist-read-private user-library-read playlist-read-collaborative"
 
-with open("authentication/state.txt", "w") as file:
+with open(AUTHENTICATION_PATH + "state.txt", "w") as file:
     file.write(state + "\n")
 
 payload = {
