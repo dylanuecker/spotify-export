@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 from relative_paths import AUTHENTICATION_PATH
+import sys
 import secrets
 import string
 import webbrowser
 
-with open(AUTHENTICATION_PATH + "client_credentials.txt") as file:
-    client_id = file.readline()
+try:
+    with open(AUTHENTICATION_PATH + "client_credentials.txt") as file:
+        client_id = file.readline()
+except IOError:
+    sys.exit("Missing client credentials from Spotify dashboard app\n" +
+             "Path name: " + AUTHENTICATION_PATH + "client_credentials.txt")
 
 state = "".join(secrets.choice(string.ascii_letters + string.digits) for i in range(20))
 scope = "playlist-read-private user-library-read playlist-read-collaborative"
